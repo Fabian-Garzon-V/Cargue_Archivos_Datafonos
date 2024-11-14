@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Especificación del Proyecto: Sistema de Gestión de Archivos</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            color: #343a40;
+        }
+        .container {
+            max-width: 960px;
+        }
+        .section-title {
+            background-color: #343a40;
+            color: #ffffff;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-top: 30px;
+            margin-bottom: 20px;
+        }
+        h1, h2, h3 {
+            color: #b11c5a;
+        }
+        .list-group-item {
+            background-color: #e9ecef;
+            color: #343a40;
+        }
+        .code-block {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            color: #212529;
+        }
+        .code-block::before, .code-block::after {
+            content: '```';
+            display: block;
+            color: #b11c5a;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container my-5">
+    <h1 class="text-center mb-4">Especificación del Proyecto - Datafonos</h1>
+    <p class="text-center text-muted">Sistema de Gestión de Archivos y Consolidación de Datos en SQL Server</p>
+
+    <section>
+        <h2 class="section-title">Descripción General del Proyecto</h2>
+        <p>Este proyecto tiene como objetivo desarrollar un sistema que automatice la gestión, descompresión, consolidación y carga de archivos de datos hacia una base de datos SQL Server. La interfaz gráfica debe facilitar al usuario la carga de archivos, verificación de duplicados y parametrización de configuraciones para gestionar correctamente los archivos de entrada y el entorno de ejecución.</p>
+    </section>
+
+    <section>
+        <h2 class="section-title">Objetivos Específicos</h2>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Descompresión de Archivos ZIP encriptados con contraseña.</li>
+            <li class="list-group-item">Control de duplicados para evitar cargas repetidas en la base de datos.</li>
+            <li class="list-group-item">Consolidación de Archivos y carga de datos en SQL Server.</li>
+            <li class="list-group-item">Configuración personalizable a través de un archivo <code>config.ini</code>.</li>
+            <li class="list-group-item">Interfaz gráfica amigable e intuitiva para el usuario final.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2 class="section-title">Especificaciones Técnicas</h2>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Lenguaje de Programación:</strong> Python 3</li>
+            <li class="list-group-item"><strong>Framework de Interfaz Gráfica:</strong> Tkinter</li>
+            <li class="list-group-item"><strong>Base de Datos:</strong> SQL Server</li>
+            <li class="list-group-item"><strong>Archivo de Configuración:</strong> config.ini</li>
+            <li class="list-group-item"><strong>Librerías Necesarias:</strong> pyodbc, configparser, tkinter, pyzipper, pandas, datetime, shutil, re</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2 class="section-title">Requerimientos del Sistema</h2>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Sistema Operativo: Windows o Linux</li>
+            <li class="list-group-item">Python 3.6 o superior</li>
+            <li class="list-group-item">Controlador ODBC para SQL Server</li>
+            <li class="list-group-item">Permisos de escritura y acceso a SQL Server</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2 class="section-title">Arquitectura del Proyecto</h2>
+        <p>El sistema está dividido en módulos independientes, cada uno enfocado en una funcionalidad principal: descompresión de archivos, consolidación y carga en base de datos, y administración de configuración. Los módulos están integrados en una interfaz gráfica común para facilitar la navegación.</p>
+    </section>
+
+    <section>
+        <h2 class="section-title">Módulos y Funcionalidades</h2>
+        <h3>6.1 Módulo de Inicio de Sesión</h3>
+        <p>Autentica al usuario contra la base de datos SQL Server y establece una conexión activa.</p>
+
+        <h3>6.2 Módulo de Descompresión de Archivos</h3>
+        <p>Permite al usuario seleccionar una carpeta y descomprimir archivos ZIP encriptados.</p>
+
+        <h3>6.3 Módulo de Consolidación de Archivos</h3>
+        <p>Procesa archivos descomprimidos, transforma y carga los datos en SQL Server, y controla duplicados.</p>
+
+        <h3>6.4 Módulo de Modificación de Configuración</h3>
+        <p>Permite al usuario ajustar parámetros de configuración a través de una interfaz amigable.</p>
+    </section>
+
+    <section>
+        <h2 class="section-title">Flujo del Sistema</h2>
+        <ol class="list-group list-group-flush">
+            <li class="list-group-item">Inicio de sesión y autenticación.</li>
+            <li class="list-group-item">Descompresión de archivos ZIP.</li>
+            <li class="list-group-item">Validación y transformación de datos.</li>
+            <li class="list-group-item">Carga de datos en la base de datos.</li>
+            <li class="list-group-item">Modificación de configuración.</li>
+        </ol>
+    </section>
+
+    <section>
+        <h2 class="section-title">Archivos y Configuración</h2>
+        <p>El archivo <code>config.ini</code> almacena configuraciones necesarias como conexión a la base de datos y rutas de archivos. Ejemplo:</p>
+        <div class="code-block">
+            [database]<br>
+            server = 192.168.2.106<br>
+            database = PRUEBAS_BD<br>
+            user = UsuarioBD<br>
+            <br>
+            [paths]<br>
+            decompression_origin = C:/ruta/descompresion<br>
+            consolidation_origin = C:/ruta/consolidacion/origen<br>
+            consolidation_dest = C:/ruta/consolidacion/destino<br>
+            <br>
+            [decompression]<br>
+            table_control_descompression = ControlCargaArchivosDatafonos<br>
+            <br>
+            [consolidation]<br>
+            table_control_cargue = ControlCargaArchivosDatafonos<br>
+            table_datafonos = Datafonos
+        </div>
+    </section>
+
+    <section>
+        <h2 class="section-title">Pruebas y Validación</h2>
+        <p>Se realizarán pruebas para verificar el funcionamiento del sistema en aspectos de autenticación, descompresión, consolidación y configuración.</p>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item">Pruebas de autenticación: inicio de sesión con credenciales válidas e inválidas.</li>
+            <li class="list-group-item">Pruebas de descompresión: manejo de archivos duplicados y archivos nuevos.</li>
+            <li class="list-group-item">Pruebas de consolidación: manejo de duplicados y validación de campos de datos.</li>
+            <li class="list-group-item">Pruebas de modificación de configuración: guardado de cambios en <code>config.ini</code>.</li>
+        </ul>
+    </section>
+
+    <section>
+        <h2 class="section-title">Conclusiones</h2>
+        <p>Este sistema permite gestionar eficientemente el flujo de datos desde archivos ZIP hasta su consolidación en SQL Server, con un control adecuado de duplicados y configuraciones personalizables. La interfaz gráfica facilita el uso y operación del sistema, permitiendo una implementación exitosa en un entorno de producción.</p>
+    </section>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
