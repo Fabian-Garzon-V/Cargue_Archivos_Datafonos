@@ -4,33 +4,37 @@ from ui.decompression import DecompressionTab
 from ui.consolidation import ConsolidationTab
 from ui.config_tab import ConfigTab
 from database import connect_to_db
-import configparser
-import sys
-import os
+from config import cargar_configuracion, recargar_configuracion  # Importa la función del módulo config.py
 
 # Configuración de customtkinter
 ctk.set_appearance_mode("dark")  # Tema oscuro
 ctk.set_default_color_theme("dark-blue")  # Color de acento
 
-# Función para obtener la ruta de config.ini
-def get_config_path():
-    if hasattr(sys, '_MEIPASS'):
-        return os.path.join(sys._MEIPASS, 'config.ini')
-    return os.path.join(os.path.dirname(__file__), 'config.ini')
-
-# Cargar la configuración solo una vez
-config = configparser.ConfigParser()
-config_path = get_config_path()
-config.read(config_path)
+# Cargar la configuración usando config.py
+config = cargar_configuracion()
 
 class DatabaseApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Aplicación de Gestión de Archivos")
+        self.root.title("Aplicación Descompresión-Cargue archivos - Datafonos")
         self.root.geometry("1196x600")
         self.db_connection = None
         self.db_password = None
         self.show_login_screen()
+
+    def refresh_ui(self):
+        """Recarga la configuración desde config.ini y actualiza la interfaz."""
+        global config  # Actualiza la variable global config
+        config = recargar_configuracion()  # Recarga la configuración desde config.ini
+
+        # Actualiza los campos de inicio de sesión si existen
+        if hasattr(self, 'username_entry') and self.username_entry.winfo_exists():
+            self.username_entry.delete(0, ctk.END)
+            self.username_entry.insert(0, config['database']['user'])
+            print("Usuario actualizado en la pantalla de inicio de sesión.")
+
+        # Puedes agregar más actualizaciones según sea necesario
+        print("La interfaz se ha actualizado con la nueva configuración.")
 
     def show_login_screen(self):
         self.login_frame = ctk.CTkFrame(self.root)
@@ -43,6 +47,7 @@ class DatabaseApp:
         user_label.grid(row=1, column=0, pady=5, padx=10, sticky="w")
         
         self.username_entry = ctk.CTkEntry(self.login_frame, font=("Arial", 12))
+        # Leer el usuario desde la configuración
         self.username_entry.insert(0, config['database']['user'])
         self.username_entry.grid(row=1, column=1, pady=5, padx=10)
         
@@ -78,7 +83,15 @@ class DatabaseApp:
         button_commands = [self.show_decompression_tab, self.show_consolidation_tab, self.show_config_tab]
 
         for i, (text, cmd) in enumerate(zip(button_texts, button_commands)):
-            button = ctk.CTkButton(self.sidebar, text=text, command=cmd, font=("Arial", 14))
+            button = ctk.CTkButton(
+                self.sidebar,
+                text=text,
+                command=cmd,
+                font=("Arial", 14, "bold"),
+                fg_color="#b11c5a",       # Color de fondo del botón
+                hover_color="#d23e76",    # Color al pasar el mouse
+                width=200
+            )
             button.pack(pady=15, padx=10, fill="x")
 
         self.card_container = ctk.CTkFrame(self.root, corner_radius=15)
@@ -97,7 +110,7 @@ class DatabaseApp:
         # Pasar `config` cargado y `self.db_password` a cada clase
         self.decompression_tab = DecompressionTab(self.cards["decompression"], self.db_password, config)
         self.consolidation_tab = ConsolidationTab(self.cards["consolidation"], self.db_password, config)
-        self.config_tab = ConfigTab(self.cards["config"], config)
+        self.config_tab = ConfigTab(self.cards["config"], self)
 
         for card in self.cards.values():
             card.pack_forget()  # Ocultamos todas las tarjetas al inicio

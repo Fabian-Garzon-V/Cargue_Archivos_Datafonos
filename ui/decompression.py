@@ -45,11 +45,28 @@ class DecompressionTab:
         self.decompression_path.pack(pady=5)
         
         # Botón para seleccionar carpeta
-        select_button = ctk.CTkButton(self.frame, text="Seleccionar Carpeta", command=self.select_decompression_path)
+        select_button = ctk.CTkButton(
+            self.frame, 
+            text="Seleccionar Carpeta", 
+            command=self.select_decompression_path,            
+            font=("Arial", 12, "bold"),
+            fg_color="#c00063",
+            hover_color="#b0005c",
+            width=200
+        )
         select_button.pack(pady=5)
+        
 
         # Botón para iniciar la descompresión
-        extract_button = ctk.CTkButton(self.frame, text="Descomprimir Archivos", command=self.run_extraction, font=("Arial", 12))
+        extract_button = ctk.CTkButton(
+        self.frame,
+        text="Descomprimir Archivos",
+        command=self.run_extraction,
+        font=("Arial", 14, "bold"),
+        fg_color="#c00063",
+        hover_color="#b0005c",
+        width=200        
+        )
         extract_button.pack(pady=20)
 
     def select_decompression_path(self):

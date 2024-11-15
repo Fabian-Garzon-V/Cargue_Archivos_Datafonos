@@ -1,34 +1,25 @@
 import customtkinter as ctk
 from tkinter import messagebox
-import sys
-import os
-
-def get_resource_path(relative_path):
-    # Obtiene la ruta del directorio de ejecución del .exe o script
-    if getattr(sys, 'frozen', False):  # Verifica si está empaquetado
-        dir_actual = os.path.dirname(sys.executable)
-    else:
-        dir_actual = os.path.abspath(".")
-    return os.path.join(dir_actual, relative_path)
+from config import guardar_rutas, guardar_base_datos, guardar_tablas_consolidacion, recargar_configuracion
 
 class ConfigTab:
-    def __init__(self, frame, config):
+    def __init__(self, frame, app):
         """
         Inicializa la pestaña de configuración.
-        Recibe el frame donde se mostrarán los widgets.
+        Recibe el frame donde se mostrarán los widgets y una referencia a la aplicación principal.
         """
         self.frame = frame
-        self.config = config  # Usa directamente el config pasado como argumento
+        self.app = app  # Referencia a la instancia de DatabaseApp
+        self.config = recargar_configuracion()  # Cargar configuración inicial
 
         # Mapeo para mostrar nombres amigables
         self.label_mapping = {
             'database.server': 'Servidor',
             'database.database': 'Base de Datos',
             'database.user': 'Usuario',
-            # 'paths.decompression_origin': 'Ruta de Descompresión',
-            'decompression.base_folder': 'Ruta de archivos descomprensión',
             'paths.consolidation_origin': 'Ruta de Consolidación Origen',
             'paths.consolidation_dest': 'Ruta de Consolidación Destino',
+            'decompression.base_folder': 'Ruta de archivos descompresión',
             'decompression.table_control_descompression': 'SQL - Tabla control archivos descomprimidos',
             'consolidation.table_control_cargue': 'SQL - Tabla Control Carga Archivos Datafonos',
             'consolidation.table_datafonos': 'SQL - Tabla Consolidado Archivos Datafonos'
@@ -38,7 +29,7 @@ class ConfigTab:
         self.create_widgets()
 
     def create_widgets(self):
-        """Crea campos de entrada en la pestaña usando nombres amigables"""
+        """Crea campos de entrada en la pestaña usando nombres amigables."""
         self.entries = {}  # Para almacenar las entradas y acceder a los valores
         row = 0
 
@@ -48,11 +39,12 @@ class ConfigTab:
 
         row += 1
 
-        for section in self.config.sections():
-            for key in self.config[section]:
+        # Iterar sobre las configuraciones cargadas
+        for section, keys in self.config.items():
+            for key, value in keys.items():
                 # Formato: section.key
                 config_key = f"{section}.{key}"
-                # Obtener etiqueta amigable o usar la clave del config.ini
+                # Obtener etiqueta amigable o usar la clave directamente
                 label_text = self.label_mapping.get(config_key, config_key)
                 
                 # Crear y organizar el campo en la interfaz
@@ -60,25 +52,65 @@ class ConfigTab:
                 label.grid(row=row, column=0, padx=10, pady=5, sticky='w')
 
                 entry = ctk.CTkEntry(self.frame, width=510, font=("Arial", 12))
-                entry.insert(0, self.config[section][key])
+                entry.insert(0, value)  # Insertar el valor actual de la configuración
                 entry.grid(row=row, column=1, padx=10, pady=5)
                 
                 self.entries[config_key] = entry
                 row += 1
 
         # Botón para guardar cambios
-        save_button = ctk.CTkButton(self.frame, text="Guardar Cambios", command=self.save_changes, font=("Arial", 14, "bold"))
+        save_button = ctk.CTkButton(
+            self.frame, 
+            text="Guardar Cambios", 
+            command=self.save_changes, 
+            font=("Arial", 14, "bold"),
+            fg_color="#b11c5a",
+            hover_color="#d23e76",
+            width=200
+        )
         save_button.grid(row=row, column=0, columnspan=2, pady=(20, 10))
 
     def save_changes(self):
-        """Guarda los valores actualizados en el archivo config.ini"""
-        config_path = get_resource_path("config.ini")  # Usa get_resource_path para obtener la ruta correcta
+        """Guarda los valores actualizados en config.ini y refresca la aplicación principal."""
+        rutas = {}
+        db_config = {}
+        tablas_consolidacion = {}
+        decompression_config = {}
 
+        # Extraer valores modificados por el usuario
         for config_key, entry in self.entries.items():
             section, key = config_key.split('.')
-            self.config[section][key] = entry.get()
+            value = entry.get()
 
-        with open(config_path, 'w') as configfile:
-            self.config.write(configfile)
+            if section == 'paths':
+                rutas[key] = value
+            elif section == 'database':
+                db_config[key] = value
+            elif section == 'decompression':
+                decompression_config[key] = value
+            elif section == 'consolidation':
+                tablas_consolidacion[key] = value
 
-        messagebox.showinfo("Configuración Guardada", "Los cambios han sido guardados en config.ini.")
+        # Guardar cada sección usando las funciones de config.py
+        if rutas:
+            guardar_rutas(
+                rutas.get("consolidation_origin", ""), 
+                rutas.get("consolidation_dest", "")
+            )
+        if db_config:
+            guardar_base_datos(
+                db_config.get("server", ""), 
+                db_config.get("database", ""), 
+                db_config.get("user", "")
+            )
+        if tablas_consolidacion:
+            guardar_tablas_consolidacion(
+                tablas_consolidacion.get("table_control_cargue", ""), 
+                tablas_consolidacion.get("table_datafonos", "")
+            )
+
+        # Llamar a refresh_ui para actualizar la interfaz principal
+        self.app.refresh_ui()
+
+        # Mostrar mensaje de éxito
+        messagebox.showinfo("Configuración Guardada", "Los cambios han sido guardados correctamente.")
